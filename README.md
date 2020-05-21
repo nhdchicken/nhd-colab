@@ -30,7 +30,7 @@ There are two options
 
 2. Alternatively got to https://colab.research.google.com. Then you will have this dialog box
 
-    ![Run In Colab](images/colab-opennd-dialog.png)
+    ![Open from GitHub](images/colab-opennd-dialog.png)
     
 Once the notebook is opened, follow the instructions.
 
@@ -142,6 +142,10 @@ Here is an example of what such a cell should look like
 cd /content/nhd-colab/
 colab init mp-mask-rcnn
 ```
+
+The beginning of your notebook should look like this on Colab
+
+![sample notebook on colab](images/notebook-init.png)
 
 ### Adding New Sub-Modules  
 
