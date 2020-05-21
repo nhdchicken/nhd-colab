@@ -3,7 +3,7 @@
 This repository is used to experiment with various models on 
 [Colab Research](https://colab.research.google.com/). 
 
-It is **IMPORTANT** to note that no code written proprietary code or IP
+It is **IMPORTANT** to note that proprietary code or IP
 (other than small modifications required to make existing/open source code work)
 is added to this repository.
 
@@ -15,14 +15,26 @@ with the --recurse-submodules
 ```shell script
     git clone --recurse-submodules https://github.com/nhdchicken/nhd-colab.git
 ```
-    
 
-## NoteBooks
+## Using NoteBooks 
 
 The notebooks are stored under [notebooks](notebooks). Those notebooks 
 are intended to be executed on [Colab Research](https://colab.research.google.com/)
 
-### Editing Notebooks locally
+There are two options
+
+1. If there is a link for the notebook, simply click on it, this will copy
+   the notebook to the colab sandbox and you are ready to go
+
+    ![Run In Colab](images/run-in-colab.png)
+
+2. Alternatively got to https://colab.research.google.com. Then you will have this dialog box
+
+    ![Run In Colab](images/colab-opennd-dialog.png)
+    
+Once the notebook is opened, follow the instructions.
+
+## Editing Notebooks locally
 
 - install jupyter
 
@@ -36,7 +48,8 @@ Simply navigate to the notebook of interest
 
 ### Installing the Environment for a NoteBook
 
-The first cell in the notebook will clone the repository if not already
+The first **code** cell in the notebook should be this boiler plate 
+code. This will clone the repository if not already
 cloned and install the colab installer script.
 
 ```shell script
@@ -58,10 +71,13 @@ colab --help || exit 1;
 echo "Great Success!"
 ```
 
-This script is responsible for initializing any required git sub-modules, 
-apply patches to the code and final perform installation.
+The next code cell should be used to initialize any of the sub module (a.k.a. components)
 
-### Configure The Sub-Modules
+The ``colab`` is responsible for initializing any required git sub-modules, 
+apply patches to the code and finally perform installation. This is the topic 
+of the next section.
+
+### Configuring Sub-Modules (Components)
 
 The submodules are listed in [.gitmodules](.gitmodules). Those are cloned
 automatically when cloning the nhd-colab repos. 
@@ -72,18 +88,53 @@ The ``colab`` command allows you to list and init/install those modules
     $ colab show -d
     going to repos root dir /Users/lpbrac/gitlab/pyops/nhd/nhd-colab
     loading install config /Users/lpbrac/gitlab/pyops/nhd/nhd-colab/install.yml
+
     list of components
+
     mp-mask-rcnn
-    installs the Mask-RCNN which is a sub-module under nhd-colab/mask-rcnn/matterport
-    the original repository is https://github.com/matterport/Mask_RCNN
+       installs the Mask-RCNN which is a sub-module under nhd-colab/mask-rcnn/matterport
+       the original repository is https://github.com/matterport/Mask_RCNN
 ```
 
-The init command are contained in the [install.yml](install.yml). To initialize 
-those modules type
+The initialization commands are contained in the [install.yml](install.yml). A component 
+definition looks like this 
+
+```yaml
+  mp-mask-rcnn :
+      doc: |
+        installs the Mask-RCNN which is a sub-module under nhd-colab/mask-rcnn/matterport
+        the original repository is https://github.com/matterport/Mask_RCNN
+
+      commands:
+        - patch --verbose mask-rcnn/matterport/mrcnn/model.py < patches/mask-rcnn-matterport-mrcnn-model.py.patch
+        - pip install -r mask-rcnn/matterport/requirements.txt
+        - pip install -e mask-rcnn/matterport/
+```
+
+Where **doc** is a description of the component to be initialized (normally a sub-module)
+and **commands** is a simple list of commands to executed (always from the root of the 
+repos.)
+
+In this case we do the following
+
+1. patch the _model.py_ file with changes to make it compatible with the TensorFlow 
+   version on Colab
+2. install the mask-rcnn python requirements
+3. install the mask-rcnn which is used the notebook
+
+### Initializing Components
+
+To initialize those component, create a new cell and enter the following
 
 ```shell script
+%%bash
+cd /content/nhd-colab/
 $ colab init <component 1> ... <component n>
 ```
+
+You need to be within the ``nhd-colab`` git repository when invoking ``colab``
+as it automatically tries to go to the root of the repository to execute.
+
 Here is an example of what such a cell should look like
 
 ```shell script
@@ -92,6 +143,44 @@ cd /content/nhd-colab/
 colab init mp-mask-rcnn
 ```
 
+### Adding New Sub-Modules  
+
+In this example we add https://github.com/matterport/Mask_RCNN under 
+[mask-rcnn/matterport](mask-rcnn/matterport)
+
+from the root of the repos
+
+```shell script
+  $ git submodule add https://github.com/matterport/Mask_RCNN mask-rcnn/matterport
+````
+this will add a new entry to [.gitmodules](.gitmodules). On Colab, this module 
+will be automatically cloned. 
+
+When working locally type
+
+```shell script
+$ git submodule init
+$ git submodule update
+```
+
+# Creating a Patch
+
+Here is a simple example for a single file (assuming you are at the root
+of the repos)
+
+```shell script
+
+$ diff -u mask-rcnn/matterport/mrcnn/model.py ../old_colab/mask-rcnn/matterport/mrcnn/model.py > patches/mask-rcnn-matterport-mrcnn-model.py.patch
+
+```
+
+The to apply the patch, add a command to the [install.yml](install.yml), 
+e.g. ```patch --verbose mask-rcnn/matterport/mrcnn/model.py < patches/mask-rcnn-matterport-mrcnn-model.py.patch```
+
+For more complex scenarios check this [Link about creating patches](https://www.thegeekstuff.com/2014/12/patch-command-examples/)
+
 ## Structure
 
-To be determined
+- [utils](utils) A bunch of small utilies including the colab script
+- [patches](patches) Where all the code patches for sub-modules should exist
+- [notebooks](notebooks) Where our own notebooks are 

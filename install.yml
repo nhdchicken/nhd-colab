@@ -1,6 +1,9 @@
-
-# Link to creating patches
-# https://www.thegeekstuff.com/2014/12/patch-command-examples/
+# Each entry under components should describe a component associated
+# to a sub module. In the doc section, describe the location of that
+# component and its purpose.
+#
+# commands are basically commands to be executed in sequence to setup
+# component.
 
 components:
 
