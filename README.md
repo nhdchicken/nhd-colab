@@ -45,7 +45,7 @@ if [ -d "/content" ] && [ ! -d "/content/nhd-colab" ]
 then
     cd /content || exit 1;
     echo "Installing https://github.com/nhdchicken/nhd-colab.git"
-    git clone https://github.com/nhdchicken/nhd-colab.git || exit 1;
+    git clone --recurse-submodules https://github.com/nhdchicken/nhd-colab.git || exit 1;
     cd nhd-colab || exit 1;
 else
     echo "Not running in Colab - going to root of repos"
@@ -60,6 +60,37 @@ echo "Great Success!"
 
 This script is responsible for initializing any required git sub-modules, 
 apply patches to the code and final perform installation.
+
+### Configure The Sub-Modules
+
+The submodules are listed in [.gitmodules](.gitmodules). Those are cloned
+automatically when cloning the nhd-colab repos. 
+
+The ``colab`` command allows you to list and init/install those modules 
+
+```shell script
+    $ colab show -d
+    going to repos root dir /Users/lpbrac/gitlab/pyops/nhd/nhd-colab
+    loading install config /Users/lpbrac/gitlab/pyops/nhd/nhd-colab/install.yml
+    list of components
+    mp-mask-rcnn
+    installs the Mask-RCNN which is a sub-module under nhd-colab/mask-rcnn/matterport
+    the original repository is https://github.com/matterport/Mask_RCNN
+```
+
+The init command are contained in the [install.yml](install.yml). To initialize 
+those modules type
+
+```shell script
+$ colab init <component 1> ... <component n>
+```
+Here is an example of what such a cell should look like
+
+```shell script
+%%bash
+cd /content/nhd-colab/
+colab init mp-mask-rcnn
+```
 
 ## Structure
 
