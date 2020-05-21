@@ -65,9 +65,8 @@ else
     cd `git rev-parse --show-toplevel` || exit 1;
 fi
 pwd
-pip install utils/colab_install/ || exit 1;
-echo "use the colab-install command"
-colab --help || exit 1;
+pip install utils/colab_install/ > /dev/null 2>&1 || exit 1;
+colab > /dev/null 2>&1 || exit 1;
 echo "Great Success!"
 ```
 

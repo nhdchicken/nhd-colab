@@ -121,6 +121,11 @@ class Components:
 )
 @click.argument('components', nargs=-1)
 def show(install_config, doc, components):
+    """ Shows the list of components that can be initialized.
+
+        use the --doc option for more details.
+
+    """
     if install_config:
         install_config = pathlib.Path(install_config)
     else:
@@ -145,7 +150,25 @@ def show(install_config, doc, components):
 
 @click.argument('components', nargs=-1)
 def init(install_config, dry_run, components):
-    """ Initialize the notebook
+    """ Initializes the component
+
+        This command should be used in a notebook when initializing
+        sub components. The components are defined in the
+        install.yml file located at the root of the git repos.
+
+        Alternatively you can change the location of that file
+        using the --install-config option.
+
+        When specifying --dry-run, the commands to be executed
+        will be echoed without being actually executed
+
+        Running this command without positional arguments will install
+        all components in the install.yml.
+
+        You can selectively install some by listing them by name on the
+        command line
+
+        $ colab init mp-mask-rcnn component2 ...
 
     """
     if install_config:
