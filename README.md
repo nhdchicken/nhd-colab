@@ -127,7 +127,12 @@ To initialize those component, create a new cell and enter the following
 
 ```shell script
 %%bash
-cd /content/nhd-colab/
+if [ -d "/content/nhd-colab" ]
+then
+   cd /content/nhd-colab/
+else
+   echo "running on local machine at " `pwd` 
+fi
 $ colab init <component 1> ... <component n>
 ```
 
@@ -138,7 +143,12 @@ Here is an example of what such a cell should look like
 
 ```shell script
 %%bash
-cd /content/nhd-colab/
+if [ -d "/content/nhd-colab" ]
+then
+   cd /content/nhd-colab/
+else
+   echo "running on local machine at " `pwd` 
+fi
 colab init mp-mask-rcnn
 ```
 
