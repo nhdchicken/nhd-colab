@@ -26,7 +26,7 @@ setup(
     zip_safe=False,
     entry_points=dict(
         console_scripts=[
-            'colab-install=colab_install:cli_main',
+            'colab=colab_install:cli_main',
         ],
     ),
 )

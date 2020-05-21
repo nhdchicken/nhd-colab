@@ -12,9 +12,9 @@ is added to this repository.
 Because this repos uses sub-modules, sub-modules need to be fetched
 with the --recurse-submodules
 
-    ```shell script
-      git clone --recurse-submodules https://github.com/nhdchicken/nhd-colab.git
-    ```
+```shell script
+    git clone --recurse-submodules https://github.com/nhdchicken/nhd-colab.git
+```
     
 
 ## NoteBooks
@@ -45,17 +45,17 @@ if [ -d "/content" ] && [ ! -d "/content/nhd-colab" ]
 then
     cd /content || exit 1;
     echo "Installing https://github.com/nhdchicken/nhd-colab.git"
-    git clone --recurse-submodules https://github.com/nhdchicken/nhd-colab.git || exit 1;
+    git clone https://github.com/nhdchicken/nhd-colab.git || exit 1;
     cd nhd-colab || exit 1;
 else
     echo "Not running in Colab - going to root of repos"
     cd `git rev-parse --show-toplevel` || exit 1;
 fi
 pwd
-
 pip install utils/colab_install/ || exit 1;
 echo "use the colab-install command"
-colab-install --help || exit 1;
+colab --help || exit 1;
+echo "Great Success!"
 ```
 
 This script is responsible for initializing any required git sub-modules, 

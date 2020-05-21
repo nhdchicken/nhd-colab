@@ -1,0 +1,23 @@
+
+# Link to creating patches
+# https://www.thegeekstuff.com/2014/12/patch-command-examples/
+
+components:
+
+  mp-mask-rcnn :
+      doc: |
+        installs the Mask-RCNN which is a sub-module under nhd-colab/mask-rcnn/matterport
+        the original repository is https://github.com/matterport/Mask_RCNN
+
+      commands:
+        - patch --verbose mask-rcnn/matterport/mrcnn/model.py < patches/mask-rcnn-matterport-mrcnn-model.py.patch
+        - pip install -r mask-rcnn/matterport/requirements.txt
+        - pip install -e mask-rcnn/matterport/
+
+  yaml-example :
+      doc: |
+          This is just an example
+      commands:
+        - echo "not doing anything"
+        - echo "I told you"
+        - echo "not doing anything"
