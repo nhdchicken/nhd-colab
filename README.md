@@ -107,8 +107,15 @@ definition looks like this
         installs the Mask-RCNN which is a sub-module under nhd-colab/mask-rcnn/matterport
         the original repository is https://github.com/matterport/Mask_RCNN
 
+      patches:
+        model:
+            ori: mask-rcnn/matterport/mrcnn/model.py
+            new: patches/matterport-mrcnn/model.py
+        utils:
+            ori: mask-rcnn/matterport/mrcnn/utils.py
+            new: patches/matterport-mrcnn/utils.py
+
       commands:
-        - patch --verbose mask-rcnn/matterport/mrcnn/model.py < patches/mask-rcnn-matterport-mrcnn-model.py.patch
         - pip install -r mask-rcnn/matterport/requirements.txt
         - pip install -e mask-rcnn/matterport/
 ```
@@ -119,10 +126,11 @@ repos.)
 
 In this case we do the following
 
-1. patch the _model.py_ file with changes to make it compatible with the TensorFlow 
-   version on Colab
-2. install the mask-rcnn python requirements
-3. install the mask-rcnn which is used the notebook
+1. Patch the model and utils files
+1. install the mask-rcnn python requirements
+2. install the mask-rcnn which is used the notebook
+
+See below for more information about patching. 
 
 ### Initializing Components
 
@@ -165,7 +173,7 @@ $ git submodule init
 $ git submodule update
 ```
 
-# Creating a Patch
+# Patching Files in a Sub Module
 
 Sometimes you will come across bugs when running a notebook. You can fix the code directly 
 in colab by clicking on the link, then restart the notebook. 
@@ -177,25 +185,16 @@ This folder contains 2 files, [model.py](patches/matterport-mrcnn/model.py) and
 file to add the following (as an exmaple):
 
 ```yaml
-  mp-mask-rcnn :
-      doc: |
-        installs the Mask-RCNN which is a sub-module under nhd-colab/mask-rcnn/matterport
-        the original repository is https://github.com/matterport/Mask_RCNN
-
-      patches:
-        model:
-            ori: mask-rcnn/matterport/mrcnn/model.py
-            new: patches/matterport-mrcnn/model.py
-        utils:
-            ori: mask-rcnn/matterport/mrcnn/utils.py
-            new: patches/matterport-mrcnn/utils.py
-
-      commands:
-        - pip install -r mask-rcnn/matterport/requirements.txt
-        - pip install -e mask-rcnn/matterport/
+  patches:
+    model:
+        ori: mask-rcnn/matterport/mrcnn/model.py
+        new: patches/matterport-mrcnn/model.py
+    utils:
+        ori: mask-rcnn/matterport/mrcnn/utils.py
+        new: patches/matterport-mrcnn/utils.py
 ```
 
-Under patches, create a fileid (e.g. model) with two entries. *ori* is the relative
+Under patches, create a fileid (e.g. **model**) with two entries. *ori* is the relative
 path (from the git root) to the file that needs to be patched, and *new* is the 
 relative path to the file you just fixed and checked-in.
 
