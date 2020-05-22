@@ -1,9 +1,10 @@
 # Each entry under components should describe a component associated
 # to a sub module. In the doc section, describe the location of that
 # component and its purpose.
+# Patches describe files that need to be patched at the time of installation
 #
 # commands are basically commands to be executed in sequence to setup
-# component.
+# components.
 
 components:
 
