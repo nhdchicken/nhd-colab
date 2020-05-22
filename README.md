@@ -129,20 +129,7 @@ In this case we do the following
 To initialize those component, create a new cell and enter the following
 
 ```shell script
-%%bash
-if [ -d "/content/nhd-colab" ]
-then
-   cd /content/nhd-colab/
-else
-   echo "running on local machine at " `pwd` 
-fi
-if [ ! -f "/content/nhd-colab/init.flag" ]
-then
-  # We do not want to run re-initialization twice
-  $ colab init <component 1> ... <component n>
-  touch "/content/nhd-colab/init.flag"
-fi
-
+! colab init <component 1> ... <component n>
 ```
 
 You need to be within the ``nhd-colab`` git repository when invoking ``colab``
@@ -151,19 +138,7 @@ as it automatically tries to go to the root of the repository to execute.
 Here is an example of what such a cell should look like
 
 ```shell script
-%%bash
-if [ -d "/content/nhd-colab" ]
-then
-   cd /content/nhd-colab/
-else
-   echo "running on local machine at " `pwd` 
-fi
-if [ ! -f "/content/nhd-colab/init.flag" ]
-then
-  # We do not want to run re-initialization twice
-  colab init mp-mask-rcnn
-  touch "/content/nhd-colab/init.flag"
-fi
+! colab init mp-mask-rcnn
 ```
 
 The beginning of your notebook should look like this on Colab

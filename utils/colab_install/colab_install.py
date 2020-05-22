@@ -187,9 +187,15 @@ def show(install_config, doc, components):
     is_flag=True,
     help="execute the installation in dry run more",
 )
+@click.option(
+    "-f",
+    "--force",
+    is_flag=True,
+    help="force initialization",
+)
 
 @click.argument('components', nargs=-1)
-def init(install_config, dry_run, components):
+def init(install_config, dry_run, force, components):
     """ Initializes an patches the component
 
         This command should be used in a notebook when initializing
@@ -202,6 +208,9 @@ def init(install_config, dry_run, components):
         When specifying --dry-run, the commands to be executed
         will be echoed without being actually executed
 
+        if a component was initialized, it is skipped unless you
+        use the --force option
+
         Running this command without positional arguments will install
         all components in the install.yml.
 
@@ -211,6 +220,14 @@ def init(install_config, dry_run, components):
         $ colab init mp-mask-rcnn component2 ...
 
     """
+    content_dir = pathlib.Path("/content/nhd-colab")
+    if content_dir.is_dir():
+        os.chdir(content_dir)
+    init_flag=pathlib.Path(os.getcwd()) / ".init.yml"
+    init_info = {}
+    if init_flag.is_file():
+        with open(init_flag, 'r') as fh:
+            init_info = yaml.load(stream=fh, Loader=yaml.SafeLoader)
     if install_config:
         install_config = pathlib.Path(install_config)
     else:
@@ -220,9 +237,19 @@ def init(install_config, dry_run, components):
     for comp_name in comps.component_list.keys():
         if components and comp_name not in components:
             continue
+        if comp_name in init_info:
+            if force:
+                click.secho(f"{comp_name} already installed - forcing", fg='yellow')
+            else:
+                click.secho(f"{comp_name} already installed - skipping", fg='green')
+                continue
         comps.install(component_name=comp_name, dry_run=dry_run)
         comps.create_patches(component_name=comp_name)
         comps.install_patches(component_name=comp_name)
+        init_info[comp_name] = True
+        with open(init_flag, 'w') as fh:
+            yaml.dump(data=init_info, stream=fh, Dumper=yaml.SafeDumper)
+
 
 
 @cli_main.command()
