@@ -12,8 +12,15 @@ components:
         installs the Mask-RCNN which is a sub-module under nhd-colab/mask-rcnn/matterport
         the original repository is https://github.com/matterport/Mask_RCNN
 
+      patches:
+        model:
+            ori: mask-rcnn/matterport/mrcnn/model.py
+            new: patches/matterport-mrcnn/model.py
+        utils:
+            ori: mask-rcnn/matterport/mrcnn/utils.py
+            new: patches/matterport-mrcnn/utils.py
+
       commands:
-        - patch --verbose mask-rcnn/matterport/mrcnn/model.py < patches/mask-rcnn-matterport-mrcnn-model.py.patch
         - pip install -r mask-rcnn/matterport/requirements.txt
         - pip install -e mask-rcnn/matterport/
 

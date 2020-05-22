@@ -54,7 +54,10 @@ cloned and install the colab installer script.
 
 ```shell script
 %%bash
-if [ -d "/content" ] && [ ! -d "/content/nhd-colab" ]
+if [  -d "/content/nhd-colab" ]
+then
+   echo "Environment already initialized"
+elif [ -d "/content" ] && [ ! -d "/content/nhd-colab" ]
 then
     cd /content || exit 1;
     echo "Installing https://github.com/nhdchicken/nhd-colab.git"
@@ -133,7 +136,13 @@ then
 else
    echo "running on local machine at " `pwd` 
 fi
-$ colab init <component 1> ... <component n>
+if [ ! -f "/content/nhd-colab/init.flag"]
+then
+  # We do not want to run re-initialization twice
+  $ colab init <component 1> ... <component n>
+  touch "/content/nhd-colab/init.flag"
+fi
+
 ```
 
 You need to be within the ``nhd-colab`` git repository when invoking ``colab``
@@ -149,7 +158,12 @@ then
 else
    echo "running on local machine at " `pwd` 
 fi
-colab init mp-mask-rcnn
+if [ ! -f "/content/nhd-colab/init.flag"]
+then
+  # We do not want to run re-initialization twice
+  colab init mp-mask-rcnn
+  touch "/content/nhd-colab/init.flag"
+fi
 ```
 
 The beginning of your notebook should look like this on Colab
@@ -178,19 +192,39 @@ $ git submodule update
 
 # Creating a Patch
 
-Here is a simple example for a single file (assuming you are at the root
-of the repos)
+Sometimes you will come across bugs when running a notebook. You can fix the code directly 
+in colab by clicking on the link, then restart the notebook. 
 
-```shell script
+Once the code is working, download the file and check it in under the [patches](patches)
+folder. Check the [patches/matterport-mrcnn](patches/matterport-mrcnn) for an example. 
+This folder contains 2 files, [model.py](patches/matterport-mrcnn/model.py) and 
+[utils.py](patches/matterport-mrcnn/utils.py). The edit the [install.yml](install.yml)
+file to add the following (as an exmaple):
 
-$ diff -u mask-rcnn/matterport/mrcnn/model.py ../old_colab/mask-rcnn/matterport/mrcnn/model.py > patches/mask-rcnn-matterport-mrcnn-model.py.patch
+```yaml
+  mp-mask-rcnn :
+      doc: |
+        installs the Mask-RCNN which is a sub-module under nhd-colab/mask-rcnn/matterport
+        the original repository is https://github.com/matterport/Mask_RCNN
 
+      patches:
+        model:
+            ori: mask-rcnn/matterport/mrcnn/model.py
+            new: patches/matterport-mrcnn/model.py
+        utils:
+            ori: mask-rcnn/matterport/mrcnn/utils.py
+            new: patches/matterport-mrcnn/utils.py
+
+      commands:
+        - pip install -r mask-rcnn/matterport/requirements.txt
+        - pip install -e mask-rcnn/matterport/
 ```
 
-The to apply the patch, add a command to the [install.yml](install.yml), 
-e.g. ```patch --verbose mask-rcnn/matterport/mrcnn/model.py < patches/mask-rcnn-matterport-mrcnn-model.py.patch```
+Under patches, create a fileid (e.g. model) with two entries. *ori* is the relative
+path (from the git root) to the file that needs to be patched, and *new* is the 
+relative path to the file you just fixed and checked-in.
 
-For more complex scenarios check this [Link about creating patches](https://www.thegeekstuff.com/2014/12/patch-command-examples/)
+When installing the component, patches will be created automatically and applied.
 
 ## Structure
 

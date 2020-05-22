@@ -93,13 +93,53 @@ class Components:
                 click.secho(f"{command}", nl=False)
                 self.sub_process(command)
 
-    def sub_process(self, cmd):
+    def create_patches(self, component_name):
+        component_config = self.get_component_config(component_name=component_name)
+        if 'patches' not in component_config:
+            LOGGER.debug(f"component has no patches {component_name}")
+            return
+        patch_list = component_config['patches']
+        for fileid, patch_info in patch_list.items():
+            original = pathlib.Path(patch_info['ori']).absolute()
+            newfile = pathlib.Path(patch_info['new']).absolute()
+            click.secho(f"{component_name}:{fileid} creating patch {original} ", fg='cyan', nl=False)
+            if not original.is_file():
+                click.ClickException(f"original file {original} to patch not found")
+            if not newfile.is_file():
+                click.ClickException(f"new file {newfile} to patch not found")
+            patch_file = newfile.parent / (str(newfile.name) + ".patch")
+            patch_info['patch_file'] = patch_file
+            patch_cmd = f"diff -u {original} {newfile} > {patch_file}"
+            self.sub_process(cmd=patch_cmd, returncode=1)  # Diff returns 1
+
+    def install_patches(self, component_name):
+        component_config = self.get_component_config(component_name=component_name)
+        if 'patches' not in component_config:
+            LOGGER.debug(f"component has no patches {component_name}")
+            return
+        patch_list = component_config['patches']
+        for fileid, patch_info in patch_list.items():
+            patch_file = patch_info.get('patch_file')
+            original = pathlib.Path(patch_info['ori']).absolute()
+            if not patch_file:
+                click.secho(f"[{fileid}] has not patch file")
+                continue
+            patch_file = pathlib.Path(patch_file).absolute()
+            click.secho(f"{component_name}:{fileid} installing patch {patch_file} on {original} ", fg='cyan', nl=False)
+            if patch_file.is_file() is False:
+                click.ClickException(f"{component_name}:{fileid} patch file not found {patch_file}")
+            patch_cmd = f"patch --verbose {original} < {patch_file}"
+            self.sub_process(cmd=patch_cmd, returncode=0)
+
+
+
+    def sub_process(self, cmd, returncode=0):
         if isinstance(cmd, list):
             cmd = " ".join(cmd)
         result = subprocess.run(
             cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE, shell=True
         )
-        if result.returncode == 0:
+        if result.returncode == returncode:
             click.secho(" OK!", fg="green")
         else:
             LOGGER.debug(result.stdout.decode('utf-8'))
@@ -150,7 +190,7 @@ def show(install_config, doc, components):
 
 @click.argument('components', nargs=-1)
 def init(install_config, dry_run, components):
-    """ Initializes the component
+    """ Initializes an patches the component
 
         This command should be used in a notebook when initializing
         sub components. The components are defined in the
@@ -181,3 +221,28 @@ def init(install_config, dry_run, components):
         if components and comp_name not in components:
             continue
         comps.install(component_name=comp_name, dry_run=dry_run)
+        comps.create_patches(component_name=comp_name)
+        comps.install_patches(component_name=comp_name)
+
+
+@cli_main.command()
+@click.option(
+    "-c", "--install-config", type=click.STRING, help="path to the configuration yaml file",
+)
+@click.argument('components', nargs=-1)
+def patch(install_config, components):
+    """ Patches the components
+
+        Note that this is performed automatically when the init command is called.
+    """
+    if install_config:
+        install_config = pathlib.Path(install_config)
+    else:
+        install_config = pathlib.Path(os.getcwd()) / 'install.yml'
+    comps = Components(install_config)
+    click.secho("creating patches", fg='cyan')
+    for comp_name in comps.component_list.keys():
+        if components and comp_name not in components:
+            continue
+        comps.create_patches(component_name=comp_name)
+        comps.install_patches(component_name=comp_name)
