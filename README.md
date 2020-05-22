@@ -136,7 +136,7 @@ then
 else
    echo "running on local machine at " `pwd` 
 fi
-if [ ! -f "/content/nhd-colab/init.flag"]
+if [ ! -f "/content/nhd-colab/init.flag" ]
 then
   # We do not want to run re-initialization twice
   $ colab init <component 1> ... <component n>
@@ -158,7 +158,7 @@ then
 else
    echo "running on local machine at " `pwd` 
 fi
-if [ ! -f "/content/nhd-colab/init.flag"]
+if [ ! -f "/content/nhd-colab/init.flag" ]
 then
   # We do not want to run re-initialization twice
   colab init mp-mask-rcnn
