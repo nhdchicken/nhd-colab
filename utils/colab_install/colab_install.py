@@ -35,7 +35,9 @@ def cli_main(log_level):
     """
     global LOGGER
     LOGGER.setLevel(log_level.upper())
-    repos_root = subprocess.check_output('git rev-parse --show-toplevel', shell=True).decode('utf-8').strip()
+    repos_root = pathlib.Path("/content/nhd-colab")
+    if not repos_root.is_dir():
+        repos_root = subprocess.check_output('git rev-parse --show-toplevel', shell=True).decode('utf-8').strip()
     click.secho(f"going to repos root dir {repos_root}", fg='yellow')
     repos_root = pathlib.Path(repos_root).absolute()
     os.chdir(repos_root)
@@ -220,9 +222,6 @@ def init(install_config, dry_run, force, components):
         $ colab init mp-mask-rcnn component2 ...
 
     """
-    content_dir = pathlib.Path("/content/nhd-colab")
-    if content_dir.is_dir():
-        os.chdir(content_dir)
     init_flag=pathlib.Path(os.getcwd()) / ".init.yml"
     init_info = {}
     if init_flag.is_file():
