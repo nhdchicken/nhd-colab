@@ -14,6 +14,9 @@ components:
         the original repository is https://github.com/matterport/Mask_RCNN
 
       patches:
+        requirements:
+            ori: mask-rcnn/matterport/requirements.txt
+            new: patches/matterport-mrcnn/requirements.txt
         model:
             ori: mask-rcnn/matterport/mrcnn/model.py
             new: patches/matterport-mrcnn/model.py
@@ -22,8 +25,8 @@ components:
             new: patches/matterport-mrcnn/utils.py
 
       commands:
-        - pip install -r mask-rcnn/matterport/requirements.txt
-        - pip install -e mask-rcnn/matterport/
+        - pip3 install -r mask-rcnn/matterport/requirements.txt
+        - pip3 install -e mask-rcnn/matterport/
 
   yaml-example :
       doc: |

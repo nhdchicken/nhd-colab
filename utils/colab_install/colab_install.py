@@ -1,5 +1,6 @@
 import os
 import pathlib
+import platform
 import logging
 import subprocess
 import click
@@ -44,6 +45,11 @@ def cli_main(log_level):
     if pathlib.Path(os.getcwd()).absolute() != repos_root:
         raise click.ClickException(f"Failed to set cwd to {repos_root} - current {os.getcwd()}")
 
+def is_jetson():
+    """ Return True if running on Jetson board, false otherwise."""
+    if platform.machine() == "aarch64" and "tegra" in platform.release():
+        return True
+    return False
 
 class Components:
 
@@ -232,6 +238,26 @@ def init(install_config, dry_run, force, components):
     else:
         install_config = pathlib.Path(os.getcwd()) / 'install.yml'
     comps = Components(install_config)
+
+    if is_jetson():
+        """ There is no opencv-python wheel gpt aarch64 and some dependencies do require 
+            it. However, opencv python bindings are installed and therefore it doesn't 
+            need to be installed. So we install that fake project to keep pip happy.
+        """
+        opencv_python = pathlib.Path(os.getcwd()) / 'utils/opencv-python'
+        if dry_run:
+            click.secho(f"should install fake opencv-python distribution on Jetson from {opencv_python}", fg='cyan')
+        else:
+            click.secho(f"installing fake opencv-python distribution on Jetson from {opencv_python}", fg='cyan')
+            cmd = "pip3 install -e {opencv_python}"
+            LOGGER.debug(cmd)
+            result = subprocess.run(f"pip3 install -e {opencv_python}", shell=True)
+            if result.returncode:
+                click.secho(f"{opencv_python} failed", fg='red')
+            else:
+                click.secho(f"Ok!", fg='green')
+
+
     click.secho("installing components", fg='cyan')
     for comp_name in comps.component_list.keys():
         if components and comp_name not in components:
