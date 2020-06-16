@@ -1,5 +1,6 @@
 import os
 import pathlib
+import pkg_resources
 import platform
 import logging
 import subprocess
@@ -21,6 +22,13 @@ ch.setFormatter(formatter)
 # add ch to logger
 LOGGER.addHandler(ch)
 
+TF_VERSION = None
+
+try:
+    TF_VERSION = int(pkg_resources.get_distribution('tensorflow').version.split('.')[0])
+except pkg_resources.DistributionNotFound:
+    raise click.ClickException("You need to have tensor flow installed.")
+
 
 @click.group()
 @click.option(
@@ -37,6 +45,7 @@ def cli_main(log_level):
     global LOGGER
     LOGGER.setLevel(log_level.upper())
     repos_root = pathlib.Path("/content/nhd-colab")
+    click.secho(f"running TensorFlow Version {pkg_resources.get_distribution('tensorflow').version}")
     if not repos_root.is_dir():
         repos_root = subprocess.check_output('git rev-parse --show-toplevel', shell=True).decode('utf-8').strip()
     click.secho(f"going to repos root dir {repos_root}", fg='yellow')
@@ -269,8 +278,11 @@ def init(install_config, dry_run, force, components):
                 click.secho(f"{comp_name} already installed - skipping", fg='green')
                 continue
         comps.install(component_name=comp_name, dry_run=dry_run)
-        comps.create_patches(component_name=comp_name)
-        comps.install_patches(component_name=comp_name)
+        if TF_VERSION > 1:
+            comps.create_patches(component_name=comp_name)
+            comps.install_patches(component_name=comp_name)
+        else:
+            click.secho(f"skipping patching with TensorFlow {TF_VERSION}", fg='yellow')
         init_info[comp_name] = True
         with open(init_flag, 'w') as fh:
             yaml.dump(data=init_info, stream=fh, Dumper=yaml.SafeDumper)
@@ -292,9 +304,12 @@ def patch(install_config, components):
     else:
         install_config = pathlib.Path(os.getcwd()) / 'install.yml'
     comps = Components(install_config)
-    click.secho("creating patches", fg='cyan')
-    for comp_name in comps.component_list.keys():
-        if components and comp_name not in components:
-            continue
-        comps.create_patches(component_name=comp_name)
-        comps.install_patches(component_name=comp_name)
+    if TF_VERSION > 1:
+        click.secho("creating patches", fg='cyan')
+        for comp_name in comps.component_list.keys():
+            if components and comp_name not in components:
+                continue
+            comps.create_patches(component_name=comp_name)
+            comps.install_patches(component_name=comp_name)
+    else:
+        raise click.ClickException(f"Patching not supported with TensorFlow {pkg_resources.get_distribution('tensorflow').version}")
