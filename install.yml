@@ -25,8 +25,8 @@ components:
             new: patches/matterport-mrcnn/utils.py
 
       commands:
-        - pip3 install -r mask-rcnn/matterport/requirements.txt
-        - pip3 install -e mask-rcnn/matterport/
+        - pip3 install -U -r mask-rcnn/matterport/requirements.txt
+        - pip3 install -U -e mask-rcnn/matterport/
 
   yaml-example :
       doc: |
