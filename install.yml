@@ -28,6 +28,14 @@ components:
         - pip3 install -U -r mask-rcnn/matterport/requirements.txt
         - pip3 install -U -e mask-rcnn/matterport/
 
+  yolov4-tf :
+      doc: |
+        Install the requirement for YoloV4 submodules
+
+      commands:
+        - pip3 install install -r yolov4/tensorflow/requirements.txt
+
+
   yaml-example :
       doc: |
           This is just an example

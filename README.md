@@ -54,6 +54,7 @@ cloned and install the colab installer script.
 
 ```shell script
 %%bash
+# This is some boiler plate code that clones the repository on Colab
 if [  -d "/content/nhd-colab" ]
 then
    echo "Environment already initialized"
@@ -67,8 +68,9 @@ else
     echo "Not running in Colab - going to root of repos"
     cd `git rev-parse --show-toplevel` || exit 1;
 fi
-pwd
+echo "Installing colab installer (which will run in the next cell)"
 pip install utils/colab_install/ > /dev/null 2>&1 || exit 1;
+echo "Checkin that Colab is available"
 colab > /dev/null 2>&1 || exit 1;
 echo "Great Success!"
 ```
@@ -199,6 +201,24 @@ path (from the git root) to the file that needs to be patched, and *new* is the
 relative path to the file you just fixed and checked-in.
 
 When installing the component, patches will be created automatically and applied.
+
+# Setting the reference.
+
+The working directory will most likely be the directory where your notebook is store.
+Putting this code in a cell with set the current working directory at the root of the 
+repos and set the NHD_COLAB_REPOS_ROOT global variable.
+
+```python
+# This cell goes to the repository root of nhd-colab and sets the NHD_COLAB_REPOS_ROOT variable.
+import os
+import pathlib
+import subprocess
+NHD_COLAB_REPOS_ROOT = pathlib.Path(subprocess.check_output('git rev-parse --show-toplevel', shell=True).decode('utf-8').strip())
+os.chdir(NHD_COLAB_REPOS_ROOT)
+assert os.getcwd() == str(NHD_COLAB_REPOS_ROOT.cwd())
+assert os.getcwd().endswith('/nhd-colab')
+print(f"NHD_COLAB_REPOS_ROOT={NHD_COLAB_REPOS_ROOT}\nOK!")
+```
 
 ## Structure
 
