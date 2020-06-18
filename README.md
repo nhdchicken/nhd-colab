@@ -213,7 +213,12 @@ repos and set the NHD_COLAB_REPOS_ROOT global variable.
 import os
 import pathlib
 import subprocess
-NHD_COLAB_REPOS_ROOT = pathlib.Path(subprocess.check_output('git rev-parse --show-toplevel', shell=True).decode('utf-8').strip())
+if os.getcwd() == '/content':
+  print("Running in Colab")
+  NHD_COLAB_REPOS_ROOT = pathlib.Path(os.getcwd()) / 'nhd-colab'
+else:
+  print("Find root of git repository")
+  NHD_COLAB_REPOS_ROOT = pathlib.Path(subprocess.check_output('git rev-parse --show-toplevel', shell=True).decode('utf-8').strip())
 os.chdir(NHD_COLAB_REPOS_ROOT)
 assert os.getcwd() == str(NHD_COLAB_REPOS_ROOT.cwd())
 assert os.getcwd().endswith('/nhd-colab')
