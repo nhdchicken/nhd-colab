@@ -6,7 +6,8 @@ import sys
 import os
 from setuptools import setup, find_packages
 
-setup_dir = os.path.dirname(__file__)
+__src_dir__ = 'src'
+sys.path.insert(0, __src_dir__)
 
 # ------------------
 # Execution
@@ -15,18 +16,19 @@ setup_dir = os.path.dirname(__file__)
 # -----------------------------------------------------------------------------
 
 setup(
-    name='colab-install',
+    name='nhd-colab',
     author="Chicken Chicken",
     author_email='nhdchicken@gmail.com',
     version='1.0',
     description="notebook installer for nhd-colab notebooks ",
     install_requires=['click', 'pyyaml'],
-    py_modules=['colab_install'],
+    package_dir={'': __src_dir__},
+    packages=find_packages(__src_dir__),
     url='https://github.com/nhdchicken/nhd-colab',
     zip_safe=False,
     entry_points=dict(
         console_scripts=[
-            'colab=colab_install:cli_main',
+            'nhdcolab=nhdcolab.colab_install:cli_main',
         ],
     ),
 )
