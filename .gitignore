@@ -1,4 +1,5 @@
 # Data files and directories common in repo root
+drive/
 datasets/
 logs/
 *.h5

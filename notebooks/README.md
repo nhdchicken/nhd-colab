@@ -1,5 +1,11 @@
 # Available Notebooks
 
+This [template notebook](notebooks/template.ipynb) does nothing by sets the environment.
+It  provides all the boiler plate stuff to setup the environment (the following 
+is just for your reference):
+* Want to try it out? Run in [Colab](https://colab.research.google.com/github/nhdchicken/nhd-colab/blob/master/notebooks/template.ipynb) 
+
+
 ## Inference
 
 * [inference/mask-rcnn.ipynb](inference/mask-rcnn.ipynb) 

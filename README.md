@@ -48,6 +48,13 @@ Simply navigate to the notebook of interest
 
 ### Installing the Environment for a NoteBook
 
+**Note**:
+
+* check the [template notebook](notebooks/template.ipynb) which provides
+all the boiler plate stuff to setup the environment (the following 
+is just for your reference). 
+* Want to try it out? Run in [Colab](https://colab.research.google.com/github/nhdchicken/nhd-colab/blob/master/notebooks/template.ipynb) 
+
 The first **code** cell in the notebook should be this boiler plate 
 code. This will clone the repository if not already
 cloned and install the colab installer script.
