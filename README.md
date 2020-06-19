@@ -7,6 +7,10 @@ It is **IMPORTANT** to note that proprietary code or IP
 (other than small modifications required to make existing/open source code work)
 is added to this repository.
 
+```bash
+$ rsync -arv --exclude=.* drive/nhddrive ~/Box/GTI/NHD/nhddrive
+```
+
 ## Cloning the repos
 
 Because this repos uses sub-modules, sub-modules need to be fetched
@@ -55,9 +59,9 @@ all the boiler plate stuff to setup the environment (the following
 is just for your reference). 
 * Want to try it out? Run in [Colab](https://colab.research.google.com/github/nhdchicken/nhd-colab/blob/master/notebooks/template.ipynb) 
 
-The first **code** cell in the notebook should be this boiler plate 
-code. This will clone the repository if not already
-cloned and install the colab installer script.
+You basically need 3 code cells at the beginning of your notebook
+
+#### Cell 1 - Cloning Repos
 
 ```shell script
 %%bash
@@ -82,11 +86,85 @@ colab > /dev/null 2>&1 || exit 1;
 echo "Great Success!"
 ```
 
+#### Cell 2 - Initializing the repos
+
 The next code cell should be used to initialize any of the sub module (a.k.a. components)
 
-The ``colab`` is responsible for initializing any required git sub-modules, 
+The ``nhdcolab init`` command is responsible for initializing any required git sub-modules, 
 apply patches to the code and finally perform installation. This is the topic 
 of the next section.
+
+To initialize those component, create a new cell and enter the following
+
+```shell script
+! nhdcolab init <component 1> ... <component n>
+```
+
+for the list of components
+
+```shell script
+$ nhdcolab show 
+...
+list of components
+mp-mask-rcnn
+yolov4-tf
+```
+
+By default, all patch groups are applied (see below for an explanation of patch group)
+
+You need to be within the ``nhd-colab`` git repository when invoking ``nhdcolab``
+as it automatically tries to go to the root of the repository to execute.
+
+Here is an example of what such a cell should look like
+
+```shell script
+! nhdcolab init mp-mask-rcnn
+```
+
+This command also patches all the code for tensorflow 2. To disable patching
+
+```shell script
+! nhdcolab init mp-mask-rcnn --no-patch
+```
+
+Or you can selective install patch groups
+
+```shell script
+! nhdcolab init mp-mask-rcnn --patch-group tensorflow_2 --patch-group mygroup ...
+```
+
+To view the list of patch groups
+
+```shell script
+$ nhdcolab patch -l
+NHD_COLAB_REPOS_ROOT=~/nhd/nhd-colab OK!
+Google Drive not mounted
+going to repos root dir ~/nhd/nhd-colab
+loading install config ~/nhd/nhd-colab/install.yml
+Component mp-mask-rcnn
+>>> processing patch group tensorflow_2
+        requirements
+                original ~/nhd/nhd-colab/mask-rcnn/matterport/requirements.txt
+                modified ~/nhd/nhd-colab/patches/matterport-mrcnn/requirements.txt
+        model
+                original ~/nhd/nhd-colab/mask-rcnn/matterport/mrcnn/model.py
+                modified ~/nhd/nhd-colab/patches/matterport-mrcnn/model.py
+        utils
+                original ~/nhd/nhd-colab/mask-rcnn/matterport/mrcnn/utils.py
+                modified ~/nhd/nhd-colab/patches/matterport-mrcnn/utils.py
+
+```
+
+#### Cell 3 - Loading the environment
+
+This is done through the [NHDEnvironment](utils/nhdcolab/src/nhdcolab/environment.py) class.
+Once loaded as a global environment variables it provides access to pre-defined locations
+in the enviroment. 
+
+```python
+from nhdcolab.environment import NHDEnvironment
+NHD_ENV = NHDEnvironment(gdrive_mount=True)
+```
 
 ### Configuring Sub-Modules (Components)
 
@@ -96,9 +174,9 @@ automatically when cloning the nhd-colab repos.
 The ``colab`` command allows you to list and init/install those modules 
 
 ```shell script
-    $ colab show -d
-    going to repos root dir /Users/lpbrac/gitlab/pyops/nhd/nhd-colab
-    loading install config /Users/lpbrac/gitlab/pyops/nhd/nhd-colab/install.yml
+    $nhdcolab show -d
+    going to repos root dir ~/nhd/nhd-colab
+    loading install config ~/nhd/nhd-colab/install.yml
 
     list of components
 
@@ -141,40 +219,6 @@ In this case we do the following
 
 See below for more information about patching. 
 
-### Initializing Components
-
-To initialize those component, create a new cell and enter the following
-
-```shell script
-! colab init <component 1> ... <component n>
-```
-
-You need to be within the ``nhd-colab`` git repository when invoking ``colab``
-as it automatically tries to go to the root of the repository to execute.
-
-Here is an example of what such a cell should look like
-
-```shell script
-! colab init mp-mask-rcnn
-```
-
-This command also patches all all the code for tensorflow 2. To disable patching
-
-```shell script
-! colab init mp-mask-rcnn --no-patch
-```
-
-Or you can selective install patch groups
-
-```shell script
-! colab init mp-mask-rcnn --patch-group tensorflow_2 --patch-group mygroup ...
-```
-
-
-The beginning of your notebook should look like this on Colab
-
-![sample notebook on colab](images/notebook-init.png)
-
 ### Adding New Sub-Modules  
 
 In this example we add https://github.com/matterport/Mask_RCNN under 
@@ -195,7 +239,7 @@ $ git submodule init
 $ git submodule update
 ```
 
-# Patching Files in a Sub Module
+### Patching Files in a Sub Module
 
 Sometimes you will come across bugs when running a notebook. You can fix the code directly 
 in colab by clicking on the link, then restart the notebook. 
@@ -227,31 +271,6 @@ path (from the git root) to the file that needs to be patched, and *new* is the
 relative path to the file you just fixed and checked-in.
 
 When installing the component, patches will be created automatically and applied.
-
-# Setting the reference.
-
-The working directory will most likely be the directory where your notebook is store.
-Putting this code in a cell with set the current working directory at the root of the 
-repos and set the NHD_COLAB_REPOS_ROOT global variable.
-
-```python
-# This cell goes to the repository root of nhd-colab and sets the NHD_COLAB_REPOS_ROOT variable.
-import os
-import pathlib
-import subprocess
-if os.getcwd() == '/content':
-  print("Running in Colab")
-  NHD_COLAB_REPOS_ROOT = pathlib.Path(os.getcwd()) / 'nhd-colab'
-else:
-  print("Find root of git repository")
-  NHD_COLAB_REPOS_ROOT = pathlib.Path(subprocess.check_output('git rev-parse --show-toplevel', shell=True).decode('utf-8').strip())
-os.chdir(NHD_COLAB_REPOS_ROOT)
-assert os.getcwd() == str(NHD_COLAB_REPOS_ROOT.cwd())
-assert os.getcwd().endswith('/nhd-colab')
-print(f"NHD_COLAB_REPOS_ROOT={NHD_COLAB_REPOS_ROOT}\nOK!")
-```
-
-## Structure
 
 - [utils](utils) A bunch of small utilies including the colab script
 - [patches](patches) Where all the code patches for sub-modules should exist
