@@ -39,7 +39,7 @@ Once the notebook is opened, follow the instructions.
 - install jupyter
 
     ```shell script
-    $ pip install pip install jupyter
+    $ pip install jupyter
     $ cd nhd-colab # be in the root of the repository
     $ jupyter notebook
     ```

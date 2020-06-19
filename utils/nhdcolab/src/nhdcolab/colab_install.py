@@ -1,12 +1,14 @@
 import os
 import pathlib
 import pkg_resources
-import platform
 import logging
 import subprocess
 import click
 import yaml
 import yaml.scanner
+import nhdcolab.environment
+
+NHDENV = nhdcolab.environment.NHDEnvironment(gdrive_mount=False)
 
 
 LEVEL_NAMES = list(map(str.lower, logging._nameToLevel.keys()))
@@ -22,12 +24,6 @@ ch.setFormatter(formatter)
 # add ch to logger
 LOGGER.addHandler(ch)
 
-TF_VERSION = None
-
-try:
-    TF_VERSION = int(pkg_resources.get_distribution('tensorflow').version.split('.')[0])
-except pkg_resources.DistributionNotFound:
-    raise click.ClickException("You need to have tensor flow installed.")
 
 
 @click.group()
@@ -44,21 +40,10 @@ def cli_main(log_level):
     """
     global LOGGER
     LOGGER.setLevel(log_level.upper())
-    repos_root = pathlib.Path("/content/nhd-colab")
-    click.secho(f"running TensorFlow Version {pkg_resources.get_distribution('tensorflow').version}")
-    if not repos_root.is_dir():
-        repos_root = subprocess.check_output('git rev-parse --show-toplevel', shell=True).decode('utf-8').strip()
-    click.secho(f"going to repos root dir {repos_root}", fg='yellow')
-    repos_root = pathlib.Path(repos_root).absolute()
-    os.chdir(repos_root)
-    if pathlib.Path(os.getcwd()).absolute() != repos_root:
-        raise click.ClickException(f"Failed to set cwd to {repos_root} - current {os.getcwd()}")
-
-def is_jetson():
-    """ Return True if running on Jetson board, false otherwise."""
-    if platform.machine() == "aarch64" and "tegra" in platform.release():
-        return True
-    return False
+    click.secho(f"going to repos root dir {NHDENV.NHD_COLAB_REPOS_ROOT}", fg='yellow')
+    os.chdir(NHDENV.NHD_COLAB_REPOS_ROOT)
+    if pathlib.Path(os.getcwd()).absolute() != NHDENV.NHD_COLAB_REPOS_ROOT:
+        raise click.ClickException(f"Failed to set cwd to {NHDENV.NHD_COLAB_REPOS_ROOT} - current {os.getcwd()}")
 
 class Components:
 
@@ -295,7 +280,7 @@ def init(install_config, dry_run, force, components, no_patch, patch_group):
         $ colab init mp-mask-rcnn --patch-group tensorflow_2 --path-group group2
 
     """
-    init_flag=pathlib.Path(os.getcwd()) / ".init.yml"
+    init_flag=NHDENV.NHD_COLAB_REPOS_ROOT / ".init.yml"
     init_info = {}
     if init_flag.is_file():
         with open(init_flag, 'r') as fh:
@@ -303,15 +288,15 @@ def init(install_config, dry_run, force, components, no_patch, patch_group):
     if install_config:
         install_config = pathlib.Path(install_config)
     else:
-        install_config = pathlib.Path(os.getcwd()) / 'install.yml'
+        install_config = NHDENV.NHD_COLAB_REPOS_ROOT / 'install.yml'
     comps = Components(install_config)
 
-    if is_jetson():
+    if NHDENV.IS_JETSON:
         """ There is no opencv-python wheel gpt aarch64 and some dependencies do require 
             it. However, opencv python bindings are installed and therefore it doesn't 
             need to be installed. So we install that fake project to keep pip happy.
         """
-        opencv_python = pathlib.Path(os.getcwd()) / 'utils/opencv-python'
+        opencv_python = NHDENV.NHD_COLAB_REPOS_ROOT / 'utils/opencv-python'
         if dry_run:
             click.secho(f"should install fake opencv-python distribution on Jetson from {opencv_python}", fg='cyan')
         else:
@@ -335,12 +320,13 @@ def init(install_config, dry_run, force, components, no_patch, patch_group):
             else:
                 click.secho(f"{comp_name} already installed - skipping", fg='green')
                 continue
-        comps.install(component_name=comp_name, dry_run=dry_run)
         if no_patch:
             click.secho(f"patching was disabled", fg='yellow')
         else:
             comps.create_patches(component_name=comp_name, groups=patch_group, dry=dry_run)
             comps.install_patches(component_name=comp_name, groups=patch_group, dry=dry_run)
+
+        comps.install(component_name=comp_name, dry_run=dry_run)
 
         init_info[comp_name] = True
         with open(init_flag, 'w') as fh:
@@ -394,7 +380,7 @@ def patch(install_config, components, patch_group, dry_run, list_patches, show_d
     if install_config:
         install_config = pathlib.Path(install_config)
     else:
-        install_config = pathlib.Path(os.getcwd()) / 'install.yml'
+        install_config = NHDENV.NHD_COLAB_REPOS_ROOT / 'install.yml'
     comps = Components(install_config)
     if not list_patches:
         click.secho("creating patches", fg='cyan')
