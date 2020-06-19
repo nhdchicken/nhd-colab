@@ -151,6 +151,19 @@ Here is an example of what such a cell should look like
 ! colab init mp-mask-rcnn
 ```
 
+This command also patches all all the code for tensorflow 2. To disable patching
+
+```shell script
+! colab init mp-mask-rcnn --no-patch
+```
+
+Or you can selective install patch groups
+
+```shell script
+! colab init mp-mask-rcnn --patch-group tensorflow_2 --patch-group mygroup ...
+```
+
+
 The beginning of your notebook should look like this on Colab
 
 ![sample notebook on colab](images/notebook-init.png)
@@ -188,15 +201,21 @@ file to add the following (as an exmaple):
 
 ```yaml
   patches:
-    model:
-        ori: mask-rcnn/matterport/mrcnn/model.py
-        new: patches/matterport-mrcnn/model.py
-    utils:
-        ori: mask-rcnn/matterport/mrcnn/utils.py
-        new: patches/matterport-mrcnn/utils.py
+    
+    tensorflow_2
+
+        model:
+            ori: mask-rcnn/matterport/mrcnn/model.py
+            new: patches/matterport-mrcnn/model.py
+        utils:
+            ori: mask-rcnn/matterport/mrcnn/utils.py
+            new: patches/matterport-mrcnn/utils.py
 ```
 
-Under patches, create a fileid (e.g. **model**) with two entries. *ori* is the relative
+Under patches, create a group name. The group name, as it says, creates groups of patches that
+can be applied selectively by name.
+
+Under the group name create a fileid (e.g. **model**) with two entries. *ori* is the relative
 path (from the git root) to the file that needs to be patched, and *new* is the 
 relative path to the file you just fixed and checked-in.
 

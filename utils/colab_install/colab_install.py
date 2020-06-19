@@ -110,43 +110,87 @@ class Components:
                 click.secho(f"{command}", nl=False)
                 self.sub_process(command)
 
-    def create_patches(self, component_name):
+    def list_patches(self, component_name, groups=None, diff=False):
         component_config = self.get_component_config(component_name=component_name)
         if 'patches' not in component_config:
             LOGGER.debug(f"component has no patches {component_name}")
             return
-        patch_list = component_config['patches']
-        for fileid, patch_info in patch_list.items():
-            original = pathlib.Path(patch_info['ori']).absolute()
-            newfile = pathlib.Path(patch_info['new']).absolute()
-            click.secho(f"{component_name}:{fileid} creating patch {original} ", fg='cyan', nl=False)
-            if not original.is_file():
-                click.ClickException(f"original file {original} to patch not found")
-            if not newfile.is_file():
-                click.ClickException(f"new file {newfile} to patch not found")
-            patch_file = newfile.parent / (str(newfile.name) + ".patch")
-            patch_info['patch_file'] = patch_file
-            patch_cmd = f"diff -u {original} {newfile} > {patch_file}"
-            self.sub_process(cmd=patch_cmd, returncode=1)  # Diff returns 1
-
-    def install_patches(self, component_name):
-        component_config = self.get_component_config(component_name=component_name)
-        if 'patches' not in component_config:
-            LOGGER.debug(f"component has no patches {component_name}")
-            return
-        patch_list = component_config['patches']
-        for fileid, patch_info in patch_list.items():
-            patch_file = patch_info.get('patch_file')
-            original = pathlib.Path(patch_info['ori']).absolute()
-            if not patch_file:
-                click.secho(f"[{fileid}] has not patch file")
+        click.secho(f"Component {component_name}", fg='green')
+        patches = component_config['patches']
+        for group, patch_list in patches.items():
+            if groups and group not in groups:
+                click.secho(f"not creating path group {group}", fg='yellow')
                 continue
-            patch_file = pathlib.Path(patch_file).absolute()
-            click.secho(f"{component_name}:{fileid} installing patch {patch_file} on {original} ", fg='cyan', nl=False)
-            if patch_file.is_file() is False:
-                click.ClickException(f"{component_name}:{fileid} patch file not found {patch_file}")
-            patch_cmd = f"patch --verbose {original} < {patch_file}"
-            self.sub_process(cmd=patch_cmd, returncode=0)
+            click.secho(f">>> processing patch group {group}", fg='cyan')
+            for fileid, patch_info in patch_list.items():
+                original = pathlib.Path(patch_info['ori']).absolute()
+                newfile = pathlib.Path(patch_info['new']).absolute()
+                if not original.is_file():
+                    click.ClickException(f"original file {original} to patch not found")
+                if not newfile.is_file():
+                    click.ClickException(f"new file {newfile} to patch not found")
+                patch_file = newfile.parent / (str(newfile.name) + ".patch")
+                patch_info['patch_file'] = patch_file
+                patch_cmd = f"diff -u {original} {newfile}"
+                click.secho(f"\t{fileid}", fg='green')
+                click.secho(f"\t\toriginal {original}", fg='green')
+                click.secho(f"\t\tmodified {newfile}", fg='green')
+                if diff:
+                    os.system(patch_cmd)
+
+    def create_patches(self, component_name, groups=None, dry=False):
+        component_config = self.get_component_config(component_name=component_name)
+        if 'patches' not in component_config:
+            LOGGER.debug(f"component has no patches {component_name}")
+            return
+        patches = component_config['patches']
+        for group, patch_list in patches.items():
+            if groups and group not in groups:
+                click.secho(f"not creating path group {group}", fg='yellow')
+                continue
+            click.secho(f">>> processing patch group {group}", fg='cyan')
+            for fileid, patch_info in patch_list.items():
+                original = pathlib.Path(patch_info['ori']).absolute()
+                newfile = pathlib.Path(patch_info['new']).absolute()
+                click.secho(f"{component_name}:{fileid} creating patch {original} ", fg='cyan', nl=False)
+                if not original.is_file():
+                    click.ClickException(f"original file {original} to patch not found")
+                if not newfile.is_file():
+                    click.ClickException(f"new file {newfile} to patch not found")
+                patch_file = newfile.parent / (str(newfile.name) + ".patch")
+                patch_info['patch_file'] = patch_file
+                patch_cmd = f"diff -u {original} {newfile} > {patch_file}"
+                if dry:
+                    click.secho(f"\n[DRY MODE] {patch_cmd}", fg='yellow')
+                else:
+                    self.sub_process(cmd=patch_cmd, returncode=1)  # Diff returns 1
+
+    def install_patches(self, component_name, groups=None, dry=False):
+        component_config = self.get_component_config(component_name=component_name)
+        if 'patches' not in component_config:
+            LOGGER.debug(f"component has no patches {component_name}")
+            return
+        patches = component_config['patches']
+        for group, patch_list in patches.items():
+            if groups and group not in groups:
+                click.secho(f"not applying path group {group}", fg='yellow')
+                continue
+            click.secho(f">>> processing patch group {group}", fg='cyan')
+            for fileid, patch_info in patch_list.items():
+                patch_file = patch_info.get('patch_file')
+                original = pathlib.Path(patch_info['ori']).absolute()
+                if not patch_file:
+                    click.secho(f"[{fileid}] has not patch file")
+                    continue
+                patch_file = pathlib.Path(patch_file).absolute()
+                click.secho(f"{component_name}:{fileid} installing patch {patch_file} on {original} ", fg='cyan', nl=False)
+                if patch_file.is_file() is False:
+                    click.ClickException(f"{component_name}:{fileid} patch file not found {patch_file}")
+                patch_cmd = f"patch --verbose {original} < {patch_file}"
+                if dry:
+                    click.secho(f"\n[DRY MODE] {patch_cmd}", fg='yellow')
+                else:
+                    self.sub_process(cmd=patch_cmd, returncode=0)
 
 
 
@@ -210,9 +254,15 @@ def show(install_config, doc, components):
     is_flag=True,
     help="force initialization",
 )
-
+@click.option(
+    "-n",
+    "--no-patch",
+    is_flag=True,
+    help="do not path the code",
+)
+@click.option('-g', '--patch-group', type=click.STRING, multiple=True)
 @click.argument('components', nargs=-1)
-def init(install_config, dry_run, force, components):
+def init(install_config, dry_run, force, components, no_patch, patch_group):
     """ Initializes an patches the component
 
         This command should be used in a notebook when initializing
@@ -235,6 +285,14 @@ def init(install_config, dry_run, force, components):
         command line
 
         $ colab init mp-mask-rcnn component2 ...
+
+        By default, all patch groups are applied. You can disable patching
+
+        $ colab init mp-mask-rcnn --no-patch
+
+        Or selectively install path groups
+
+        $ colab init mp-mask-rcnn --patch-group tensorflow_2 --path-group group2
 
     """
     init_flag=pathlib.Path(os.getcwd()) / ".init.yml"
@@ -278,11 +336,12 @@ def init(install_config, dry_run, force, components):
                 click.secho(f"{comp_name} already installed - skipping", fg='green')
                 continue
         comps.install(component_name=comp_name, dry_run=dry_run)
-        if TF_VERSION > 1:
-            comps.create_patches(component_name=comp_name)
-            comps.install_patches(component_name=comp_name)
+        if no_patch:
+            click.secho(f"patching was disabled", fg='yellow')
         else:
-            click.secho(f"skipping patching with TensorFlow {TF_VERSION}", fg='yellow')
+            comps.create_patches(component_name=comp_name, groups=patch_group, dry=dry_run)
+            comps.install_patches(component_name=comp_name, groups=patch_group, dry=dry_run)
+
         init_info[comp_name] = True
         with open(init_flag, 'w') as fh:
             yaml.dump(data=init_info, stream=fh, Dumper=yaml.SafeDumper)
@@ -293,23 +352,57 @@ def init(install_config, dry_run, force, components):
 @click.option(
     "-c", "--install-config", type=click.STRING, help="path to the configuration yaml file",
 )
+@click.option(
+    "-d",
+    "--dry-run",
+    is_flag=True,
+    help="run in dry mode",
+)
+@click.option(
+    "-l",
+    "--list-patches",
+    is_flag=True,
+    help="list the patches",
+)
+@click.option(
+    "--show-diff",
+    is_flag=True,
+    help="shows the diff",
+)
+@click.option('-g', '--patch-group', type=click.STRING, multiple=True)
 @click.argument('components', nargs=-1)
-def patch(install_config, components):
+def patch(install_config, components, patch_group, dry_run, list_patches, show_diff):
     """ Patches the components
+
+        By default all patches are applied to the component.
+        You may however, specify a list of patch groups to apply
+
+        $ colab patch mp-mask-rcnn --patch-group=tensorflow_2 --patch-group=foobar
+
+        To list the patch groups available
+
+        $ colab patch mp-mask-rcnn -l
+
+        To run in dry mode
+
+        $ colab patch mp-mask-rcnn --patch-group=tensorflow_2 -d
+
 
         Note that this is performed automatically when the init command is called.
     """
+
     if install_config:
         install_config = pathlib.Path(install_config)
     else:
         install_config = pathlib.Path(os.getcwd()) / 'install.yml'
     comps = Components(install_config)
-    if TF_VERSION > 1:
+    if not list_patches:
         click.secho("creating patches", fg='cyan')
-        for comp_name in comps.component_list.keys():
-            if components and comp_name not in components:
-                continue
-            comps.create_patches(component_name=comp_name)
-            comps.install_patches(component_name=comp_name)
-    else:
-        raise click.ClickException(f"Patching not supported with TensorFlow {pkg_resources.get_distribution('tensorflow').version}")
+    for comp_name in comps.component_list.keys():
+        if components and comp_name not in components:
+            continue
+        if list_patches:
+            comps.list_patches(component_name=comp_name, groups=patch_group, diff=show_diff)
+        else:
+            comps.create_patches(component_name=comp_name, groups=patch_group, dry=dry_run)
+            comps.install_patches(component_name=comp_name, groups=patch_group, dry=dry_run)

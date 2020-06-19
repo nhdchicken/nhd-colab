@@ -14,15 +14,18 @@ components:
         the original repository is https://github.com/matterport/Mask_RCNN
 
       patches:
-        requirements:
-            ori: mask-rcnn/matterport/requirements.txt
-            new: patches/matterport-mrcnn/requirements.txt
-        model:
-            ori: mask-rcnn/matterport/mrcnn/model.py
-            new: patches/matterport-mrcnn/model.py
-        utils:
-            ori: mask-rcnn/matterport/mrcnn/utils.py
-            new: patches/matterport-mrcnn/utils.py
+
+        # Tensorflow_2 is a group of patches.
+        tensorflow_2:
+          requirements:
+              ori: mask-rcnn/matterport/requirements.txt
+              new: patches/matterport-mrcnn/requirements.txt
+          model:
+              ori: mask-rcnn/matterport/mrcnn/model.py
+              new: patches/matterport-mrcnn/model.py
+          utils:
+              ori: mask-rcnn/matterport/mrcnn/utils.py
+              new: patches/matterport-mrcnn/utils.py
 
       commands:
         - pip3 install -U -r mask-rcnn/matterport/requirements.txt
