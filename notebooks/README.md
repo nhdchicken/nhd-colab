@@ -45,3 +45,9 @@ of TensorRT (NVidia)
 
   Run in [Colab](https://colab.research.google.com/github/nhdchicken/nhd-colab/blob/master/notebooks/incubation/yolov4/discovery.ipynb)
   
+* [incubation/yolov4/inference.ipynb](incubation/yolov4/inference.ipynb) 
+
+  First try to run Yolov4 Inference.
+
+  Run in [Colab](https://colab.research.google.com/github/nhdchicken/nhd-colab/blob/master/notebooks/incubation/yolov4/inference.ipynb)
+    
