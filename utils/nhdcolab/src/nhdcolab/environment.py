@@ -40,6 +40,10 @@ class NHDEnvironment:
     
             self._NHD_COLAB_TEST_MATERIAL = self._NHD_COLAB_DRIVE / 'test_material'
             assert self._NHD_COLAB_TEST_MATERIAL.is_dir(), f"{self._NHD_COLAB_TEST_MATERIAL} not found"
+
+            self._NHD_COLAB_MODEL_ROOT = self._NHD_COLAB_DRIVE / 'models'
+            assert self._NHD_COLAB_MODEL_ROOT.is_dir(), f"{self._NHD_COLAB_MODEL_ROOT} not found"
+
         else:
             click.secho("Google Drive not mounted", fg='yellow')
 
@@ -59,6 +63,11 @@ class NHDEnvironment:
     def NHD_COLAB_DRIVE(self):
         '''Returns the location of the google drive location (as pathlib.Path)'''
         return self._NHD_COLAB_DRIVE
+
+    @property
+    def NHD_COLAB_MODEL_ROOT(self):
+        '''Returns the location the model roots (as pathlib.Path)'''
+        return self._NHD_COLAB_MODEL_ROOT
 
     @property
     def NHD_COLAB_TEST_MATERIAL(self):

@@ -2,5 +2,5 @@
 	path = mask-rcnn/matterport
 	url = https://github.com/matterport/Mask_RCNN
 [submodule "yolov4/tensorflow"]
-	path = yolov4/tensorflow
+	path = yolov4/tensorf
 	url = https://github.com/hunglc007/tensorflow-yolov4-tflite

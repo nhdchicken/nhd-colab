@@ -36,13 +36,10 @@ components:
         Install the requirement for YoloV4 submodules
 
       commands:
-        - pip3 install install -r yolov4/tensorflow/requirements.txt
+        - pip3 install install -r yolov4/tensorf/requirements.txt
 
-
-  yaml-example :
-      doc: |
-          This is just an example
-      commands:
-        - echo "not doing anything"
-        - echo "I told you"
-        - echo "not doing anything"
+      patches:
+        common:
+          core_config:
+              ori: yolov4/tensorf/core/config.py
+              new: patches/yolov4/config.py
