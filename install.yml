@@ -41,5 +41,14 @@ components:
       patches:
         common:
           core_config:
+              # Work around relative path of the config which forces you
+              # to run stuff in the git repo root.
               ori: yolov4/tensorf/core/config.py
               new: patches/yolov4/config.py
+
+          tflite:
+              # This patch installs the coco dataset when converting model
+              # to full_int8
+              ori: yolov4/tensorf/convert_tflite.py
+              new: patches/yolov4/convert_tflite.py
+
