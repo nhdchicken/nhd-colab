@@ -36,7 +36,7 @@ components:
               new: patches/matterport-mrcnn/AmanTF2.2/utils.py
 
       commands:
-        #- pip3 install -U -r mask-rcnn/matterport/requirements.txt
+         - pip3 install -U -r mask-rcnn/matterport/requirements.txt
         #- pip3 install -U -e mask-rcnn/matterport/
 
   yolov4-tf :
