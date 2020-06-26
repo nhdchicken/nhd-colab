@@ -19,7 +19,7 @@ components:
         tensorflow_2:
           requirements:
               ori: mask-rcnn/matterport/requirements.txt
-              new: patches/matterport-mrcnn/AmanTF2.2/requirements.txt
+              new: patches/matterport-mrcnn/requirements.txt
          #Laurent changes not working 
          # model:
          #     ori: mask-rcnn/matterport/mrcnn/model.py
@@ -37,7 +37,7 @@ components:
 
       commands:
          - pip3 install -U -r mask-rcnn/matterport/requirements.txt
-        #- pip3 install -U -e mask-rcnn/matterport/
+         - pip3 install -U -e mask-rcnn/matterport/
 
   yolov4-tf :
       doc: |
