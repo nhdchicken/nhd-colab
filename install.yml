@@ -17,9 +17,9 @@ components:
 
         # Tensorflow_2 is a group of patches.
         tensorflow_2:
-        #  requirements:
-        #      ori: mask-rcnn/matterport/requirements.txt
-        #      new: patches/matterport-mrcnn/requirements.txt
+          requirements:
+              ori: mask-rcnn/matterport/requirements.txt
+              new: patches/matterport-mrcnn/requirements.txt
          #Laurent changes not working 
          # model:
          #     ori: mask-rcnn/matterport/mrcnn/model.py
