@@ -19,7 +19,7 @@ components:
         tensorflow_2:
           requirements:
               ori: mask-rcnn/matterport/requirements.txt
-              new: patches/matterport-mrcnn/requirements.txt
+              new: patches/matterport-mrcnn/AmanTF2.2/requirements.txt
          #Laurent changes not working 
          # model:
          #     ori: mask-rcnn/matterport/mrcnn/model.py
