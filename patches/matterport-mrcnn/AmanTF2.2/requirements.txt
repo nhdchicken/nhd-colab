@@ -8,5 +8,5 @@ opencv-python; platform_machine!='aarch64'
 h5py
 imgaug
 IPython[all]
-scikit-image
+scikit-image==0.16.2
 scipy==1.4.1
