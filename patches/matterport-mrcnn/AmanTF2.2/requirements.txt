@@ -9,4 +9,4 @@ h5py
 imgaug
 IPython[all]
 scikit-image
-scipy
+scipy==1.4.1
