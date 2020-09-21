@@ -4,3 +4,6 @@
 [submodule "yolov4/tensorflow"]
 	path = yolov4/tensorf
 	url = https://github.com/hunglc007/tensorflow-yolov4-tflite
+[submodule "darknet"]
+	path = darknet
+	url = https://github.com/AlexeyAB/darknet
