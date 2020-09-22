@@ -7,3 +7,6 @@
 [submodule "darknet"]
 	path = darknet
 	url = https://github.com/AlexeyAB/darknet
+[submodule "yolov4/darknet"]
+	path = yolov4/darknet
+	url = https://github.com/AlexeyAB/darknet

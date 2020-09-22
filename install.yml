@@ -60,3 +60,25 @@ components:
               ori: yolov4/tensorf/convert_tflite.py
               new: patches/yolov4/convert_tflite.py
 
+  yolov4-darknet :
+      doc: |
+        installs the patches for yolov4-darknet
+
+      patches:
+        common:
+          makefile:
+              ori: yolov4/darknet/Makefile
+              new: patches/darknet/Makefile
+          data:
+              ori: yolov4/darknet/data/obj.data
+              new: patches/darknet/obj.data
+          names:
+              ori: yolov4/darknet/data/obj.names
+              new: patches/darknet/obj.names
+          config:
+              ori: yolov4/darknet/cfg/yolov4.cfg
+              new: patches/darknet/yolov4.cfg
+          
+      commands:
+         - pip3 install -U -r mask-rcnn/matterport/requirements.txt
+         - pip3 install -U -e mask-rcnn/matterport/
