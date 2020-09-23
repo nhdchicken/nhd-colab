@@ -72,7 +72,3 @@ components:
           config:
               ori: yolov4/darknet/cfg/yolov4.cfg
               new: patches/darknet/yolov4.cfg
-          
-      commands:
-         - pip3 install -U -r mask-rcnn/matterport/requirements.txt
-         - pip3 install -U -e mask-rcnn/matterport/
