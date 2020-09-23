@@ -69,12 +69,6 @@ components:
           makefile:
               ori: yolov4/darknet/Makefile
               new: patches/darknet/Makefile
-          data:
-              ori: yolov4/darknet/data/obj.data
-              new: patches/darknet/obj.data
-          names:
-              ori: yolov4/darknet/data/obj.names
-              new: patches/darknet/obj.names
           config:
               ori: yolov4/darknet/cfg/yolov4.cfg
               new: patches/darknet/yolov4.cfg
