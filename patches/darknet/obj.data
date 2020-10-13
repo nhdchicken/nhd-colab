@@ -1,0 +1,4 @@
+classes= 2
+train  = data/train.txt
+names = data/obj.names
+backup = /content/drive/My Drive/models/yolov4/darknet/backup/
