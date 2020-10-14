@@ -80,8 +80,7 @@ class Components:
         component_config = self.get_component_config(component_name=component_name)
         click.secho(f"installing component {component_name}", fg='cyan')
         if 'commands' not in component_config:
-            raise click.ClickException(f"Component {component_name} has no commands"
-                                       f"\nYAML\n {yaml.dump(component_config, Dumper=yaml.SafeDumper)}")
+            return
         command_list = component_config['commands']
         if not isinstance(command_list, list):
             command_list = [command_list] # String literal
